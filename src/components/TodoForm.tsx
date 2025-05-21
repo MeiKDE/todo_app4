@@ -68,9 +68,11 @@ const TodoForm = ({ createTodoHandler }: TodoFormProps) => {
         <div id="description" className="flex flex-row gap-4">
           <button
             type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
+            className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 ${
+              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            }`}
           >
-            Add Todo
+            {isSubmitting ? "Adding..." : "Add Todo"}
           </button>
         </div>
       </form>

@@ -200,24 +200,33 @@ const Home = () => {
   };
 
   return (
-    <section className="flex flex-row gap-4 p-4">
-      {isLoading ? (
-        renderLoadingSpinner()
-      ) : (
-        <>
-          <TodoForm createTodoHandler={createTodoHandler} />
-          {todos.length === 0 ? (
-            renderEmptySpace()
-          ) : (
-            <TodoList
-              todos={todos}
-              updateTodoHandler={updateTodoHandler}
-              deleteTodoHandler={deleteTodoHandler}
-            />
-          )}
-        </>
+    <>
+      {(globalError || httpError) && (
+        <div>
+          {httpError}
+          {globalError}
+        </div>
       )}
-    </section>
+
+      <section className="flex flex-row gap-4 p-4">
+        {isLoading ? (
+          renderLoadingSpinner()
+        ) : (
+          <>
+            <TodoForm createTodoHandler={createTodoHandler} />
+            {todos.length === 0 ? (
+              renderEmptySpace()
+            ) : (
+              <TodoList
+                todos={todos}
+                updateTodoHandler={updateTodoHandler}
+                deleteTodoHandler={deleteTodoHandler}
+              />
+            )}
+          </>
+        )}
+      </section>
+    </>
   );
 };
 

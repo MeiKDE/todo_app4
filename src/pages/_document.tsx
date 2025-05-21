@@ -5,6 +5,7 @@ export default function Document() {
     <Html lang="en">
       <Head />
       <body
+        className=""
         suppressHydrationWarning={true}
         data-new-gr-c-s-check-loaded=""
         data-gr-ext-installed=""
