@@ -1,5 +1,6 @@
 import { Todo, TodoUpdateInput } from "@/types";
 import { useState } from "react";
+import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
 
 interface EditItemProps {
   todo: Todo;
@@ -50,39 +51,35 @@ const EditItem = ({
   };
 
   return (
-    <div key={todo.id} className="flex flex-col gap-4 bg-slate-50">
-      {error && <div className="text-red-500">{error}</div>}
-      <div id="title">
+    <div className={formStyles.container}>
+      {error && <div className={formStyles.error}>{error}</div>}
+      <div className={formStyles.field}>
+        <label className={formStyles.label}>Title</label>
         <input
           onChange={(e) => setTodoTitle(e.target.value)}
           value={todoTitle}
           placeholder="Enter title"
-          className="w-full p-2 border rounded"
+          className={`${inputStyles.base} ${error ? inputStyles.error : ""}`}
         />
       </div>
-      <div id="description" className="flex flex-row gap-4">
+      <div className={formStyles.field}>
+        <label className={formStyles.label}>Description</label>
         <input
           onChange={(e) => setTodoDescription(e.target.value)}
           value={todoDescription}
           placeholder="Enter description"
-          className="w-full p-2 border rounded"
+          className={inputStyles.base}
         />
       </div>
-      <div id="created-date" className="flex flex-row gap-4">
-        <label>Created: {new Date(todo.createdAt).toLocaleString()}</label>
-        <label>Updated: {new Date(todo.updatedAt).toLocaleString()}</label>
+      <div className="text-sm text-gray-600">
+        <p>Created: {new Date(todo.createdAt).toLocaleString()}</p>
+        <p>Updated: {new Date(todo.updatedAt).toLocaleString()}</p>
       </div>
-      <div id="add-todo-button" className="flex flex-row gap-4">
-        <button
-          onClick={onSave}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
-        >
+      <div className="flex gap-2">
+        <button onClick={onSave} className={buttonStyles.primary}>
           Save
         </button>
-        <button
-          onClick={onCancel}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
-        >
+        <button onClick={onCancel} className={buttonStyles.primary}>
           Cancel
         </button>
       </div>

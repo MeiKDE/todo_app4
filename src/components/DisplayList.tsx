@@ -1,4 +1,5 @@
 import { Todo } from "@/types/index";
+import { formStyles, buttonStyles } from "@/styles/common";
 
 interface DisplayListProps {
   todo: Todo;
@@ -12,31 +13,28 @@ const DisplayList = ({
   deleteTodoHandle,
 }: DisplayListProps) => {
   return (
-    <div key={todo.id} className="flex flex-col gap-4 bg-slate-50">
-      <div id="title">
-        <label>Title: {todo.title}</label>
+    <div className={formStyles.container}>
+      <div className={formStyles.field}>
+        <label className={formStyles.label}>Title</label>
+        <p className="text-gray-800">{todo.title}</p>
       </div>
-      <div id="description" className="flex flex-row gap-4">
-        <label>Description: {todo.description}</label>
+      <div className={formStyles.field}>
+        <label className={formStyles.label}>Description</label>
+        <p className="text-gray-800">{todo.description}</p>
       </div>
-      <div id="created-date" className="flex flex-row gap-4">
-        <label>Created: {new Date(todo.createdAt).toLocaleString()}</label>
+      <div className="text-sm text-gray-600">
+        <p>Created: {new Date(todo.createdAt).toLocaleString()}</p>
       </div>
-      <div id="add-todo-button" className="flex flex-row gap-4">
-        <button
-          onClick={onClickDisplayList}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
-        >
+      <div className="flex gap-2">
+        <button onClick={onClickDisplayList} className={buttonStyles.primary}>
           Edit
         </button>
-        <button
-          onClick={deleteTodoHandle}
-          className="bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200"
-        >
+        <button onClick={deleteTodoHandle} className={buttonStyles.danger}>
           Delete
         </button>
       </div>
     </div>
   );
 };
+
 export default DisplayList;

@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { TodoAddInput } from "@/types";
+import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
+
 interface TodoFormProps {
   createTodoHandler: (todoAddInput: TodoAddInput) => void;
 }
@@ -39,38 +41,40 @@ const TodoForm = ({ createTodoHandler }: TodoFormProps) => {
 
   return (
     <section id="todo-form" className="flex-1">
-      <div id="ford-header">
-        <h1 className=" border border-gray-400 text-2xl">To Do Form:</h1>
+      <div id="form-header">
+        <h1 className="text-2xl font-bold mb-4">To Do Form:</h1>
       </div>
-      <div>{formError && <div className="text-red-500">{formError}</div>}</div>
-      <form
-        onSubmit={submitTodoHandler}
-        className="flex flex-col gap-4 bg-slate-50"
-      >
-        <div id="title">
-          <label>Title *</label>
+      {formError && <div className={formStyles.error}>{formError}</div>}
+      <form onSubmit={submitTodoHandler} className={formStyles.container}>
+        <div className={formStyles.field}>
+          <label className={formStyles.label}>Title *</label>
           <input
             type="text"
             placeholder="Enter title here"
             onChange={(e) => setTodoTitle(e.target.value)}
             value={todoTitle}
+            className={`${inputStyles.base} ${
+              formError ? inputStyles.error : ""
+            }`}
           />
         </div>
-        <div id="description" className="flex flex-row gap-4">
-          <label>Description</label>
+        <div className={formStyles.field}>
+          <label className={formStyles.label}>Description</label>
           <textarea
             placeholder="Enter description here"
             rows={10}
             onChange={(e) => setTodoDescription(e.target.value)}
             value={todoDescription}
+            className={inputStyles.base}
           />
         </div>
-        <div id="description" className="flex flex-row gap-4">
+        <div>
           <button
             type="submit"
-            className={`bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 px-4 rounded-md transition-colors duration-200 ${
-              isSubmitting ? "opacity-50 cursor-not-allowed" : ""
+            className={`${buttonStyles.primary} ${
+              isSubmitting ? buttonStyles.disabled : ""
             }`}
+            disabled={isSubmitting}
           >
             {isSubmitting ? "Adding..." : "Add Todo"}
           </button>

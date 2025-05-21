@@ -33,7 +33,7 @@ const TodoList = ({
 
   return (
     <section id="todo-list" className="flex-1">
-      <h1 className="border border-pink-400 text-2xl">To Do List:</h1>
+      <h1 className="text-2xl font-bold mb-4">To Do List:</h1>
 
       {todos.map((todo) =>
         isEditing && editingTodoId === todo.id ? (
