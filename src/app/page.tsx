@@ -1,164 +1,25 @@
 "use client";
-import React, { useState, useCallback, useEffect } from "react";
-import {
-  Todo,
-  TodoAddInput,
-  TodoUpdateInput,
-  ErrorHandlers,
-} from "@/types/index";
+import React, { useEffect } from "react";
 import TodoForm from "@/components/TodoForm";
 import TodoList from "@/components/TodoList";
-
-export const handleApiError = async (
-  response: Response,
-  { fallbackMessage, setHttpError, setGlobalError }: ErrorHandlers
-): Promise<never> => {
-  let message = fallbackMessage;
-
-  try {
-    const errorData = await response.json();
-    if (errorData?.error) {
-      message = errorData.error;
-      setHttpError(message);
-    } else {
-      setGlobalError(message);
-    }
-  } catch (parseErr) {
-    console.warn("Failed to parse error JSON", parseErr);
-    setGlobalError("Unexpected error format from server.");
-  }
-
-  console.error("API error:", message);
-  throw new Error(message);
-};
+import { useTodos } from "@/hooks/useTodos";
 
 const Home = () => {
-  const [todos, setTodos] = useState<Todo[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [globalError, setGlobalError] = useState<string>("");
-  const [httpError, setHttpError] = useState<string>("");
+  const {
+    todos,
+    isLoading,
+    globalError,
+    httpError,
+    getTodos,
+    createTodo,
+    updateTodo,
+    deleteTodo,
+  } = useTodos();
 
   // Load initial data when component mounts
   useEffect(() => {
-    getDataHandler();
-  }, []);
-
-  // READ - make GET API call to render todo data
-  const getDataHandler = async () => {
-    setGlobalError("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/todos");
-
-      if (!response.ok) {
-        await handleApiError(response, {
-          fallbackMessage: "Failed to fetch todos",
-          setHttpError,
-          setGlobalError,
-        });
-      }
-
-      const todos = await response.json();
-      setTodos(todos);
-    } catch (err) {
-      console.error("Unexpected error while fetching todos:", err);
-      setGlobalError("A network or system error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // CREATE a new todo
-  const createTodoHandler = async (todoAddInput: TodoAddInput) => {
-    setGlobalError("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/todos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(todoAddInput),
-      });
-
-      if (!response.ok) {
-        await handleApiError(response, {
-          fallbackMessage: "Failed to create todo",
-          setHttpError,
-          setGlobalError,
-        });
-      }
-
-      const data = await response.json();
-      setTodos((prev) => [data, ...prev]);
-    } catch (err) {
-      console.error("Unexpected error while creating todo:", err);
-      setGlobalError("A network or system error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // UPDATE todo
-  const updateTodoHandler = async (
-    id: number,
-    todoUpdateInput: TodoUpdateInput
-  ) => {
-    setGlobalError("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`/api/todos/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(todoUpdateInput),
-      });
-
-      if (!response.ok) {
-        await handleApiError(response, {
-          fallbackMessage: "Failed to update todo",
-          setHttpError,
-          setGlobalError,
-        });
-      }
-
-      const updatedData = await response.json();
-      setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
-    } catch (err) {
-      console.error("Unexpected error while updating todo:", err);
-      setGlobalError("A network or system error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // DELETE todo
-  const deleteTodoHandler = async (id: number) => {
-    setGlobalError("");
-    setIsLoading(true);
-
-    try {
-      const response = await fetch(`/api/todos/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      if (!response.ok) {
-        await handleApiError(response, {
-          fallbackMessage: "Failed to delete todo",
-          setHttpError,
-          setGlobalError,
-        });
-      }
-
-      setTodos(todos.filter((todo) => todo.id !== id));
-    } catch (err) {
-      console.error("Unexpected error while deleting todo:", err);
-      setGlobalError("A network or system error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    getTodos();
+  }, [getTodos]);
 
   const renderLoadingSpinner = () => {
     return (
@@ -167,6 +28,7 @@ const Home = () => {
       </div>
     );
   };
+
   const renderEmptySpace = () => {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md text-center">
@@ -189,14 +51,14 @@ const Home = () => {
           renderLoadingSpinner()
         ) : (
           <>
-            <TodoForm createTodoHandler={createTodoHandler} />
+            <TodoForm createTodoHandler={createTodo} />
             {todos.length === 0 ? (
               renderEmptySpace()
             ) : (
               <TodoList
                 todos={todos}
-                updateTodoHandler={updateTodoHandler}
-                deleteTodoHandler={deleteTodoHandler}
+                updateTodoHandler={updateTodo}
+                deleteTodoHandler={deleteTodo}
               />
             )}
           </>
