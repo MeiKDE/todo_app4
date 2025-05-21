@@ -43,10 +43,12 @@ Node.js is what runs JavaScript on your computer (outside a browser). npm is a t
 - When Node.js is installed, it automatically installs npm too
 
 To check if installation worked, open your Mac's Terminal app and type:
+
 ```bash
 node --version
 npm --version
 ```
+
 You should see version numbers in response.
 
 ### 2. PostgreSQL Database
@@ -121,19 +123,21 @@ This might take a few minutes to complete.
 2. Now, you need to create a special file that tells the app how to connect to your database.
 
    Create a new file named `.env` in the main folder of the app:
-   
+
    ```bash
    # In Terminal, navigate to your project folder
    touch .env
    open -e .env  # This opens the file in TextEdit
    ```
-   
+
    Inside this file, add this line:
+
    ```
    DATABASE_URL="postgresql://postgres@localhost:5432/nextjs_todo_app?schema=public"
    ```
-   
+
    > **Note:** If you set up Postgres.app with a password, your connection string should be:
+   >
    > ```
    > DATABASE_URL="postgresql://postgres:yourpassword@localhost:5432/nextjs_todo_app?schema=public"
    > ```
@@ -203,8 +207,9 @@ You should see the Todo app running. You can now add, edit, and delete todos!
 > **Note for Replit users**: The app will automatically run on port 5000 and be accessible through the Replit webview.
 
 **If something doesn't work:**
+
 - Make sure PostgreSQL is running (check for the elephant icon in your menu bar)
-- Check that your `.env` file has the correct database URL 
+- Check that your `.env` file has the correct database URL
 - Make sure you ran the Prisma commands in step 4
 - Check for any error messages in the Terminal
 - If you're having database connection issues, try restarting Postgres.app
@@ -237,6 +242,7 @@ This project uses the Next.js App Router pattern for API routes, which provides 
 ### `/api/todos` Endpoints
 
 - **GET** - Fetch all todos
+
   - Usage: `GET /api/todos`
   - Returns: Array of todo items
 
@@ -248,10 +254,12 @@ This project uses the Next.js App Router pattern for API routes, which provides 
 ### `/api/todos/[id]` Endpoints
 
 - **GET** - Fetch a specific todo
+
   - Usage: `GET /api/todos/[id]`
   - Returns: Single todo item
 
 - **PUT** - Update a todo
+
   - Usage: `PUT /api/todos/[id]`
   - Body: `{ title?: string, description?: string, completed?: boolean }`
   - Returns: The updated todo item
@@ -319,15 +327,18 @@ This project uses the newer App Router pattern introduced in Next.js 13. Here's 
 ### App Router Benefits
 
 1. **Cleaner API Routes**:
+
    - Define separate functions for each HTTP method (GET, POST, PUT, DELETE)
    - Better organization and readability
    - More maintainable code structure
 
 2. **Route Grouping**:
+
    - Enhanced organization of routes with nested folders
    - Dynamic routes with parameters directly in folder names (e.g., `[id]`)
 
 3. **Server Components by Default**:
+
    - Better performance with React Server Components
    - Reduced client-side JavaScript
 
@@ -345,10 +356,18 @@ src/app/api/todos/[id]/route.ts    # Handles /api/todos/[id] endpoints
 Each file exports functions named after the HTTP methods they handle:
 
 ```typescript
-export async function GET() { /* ... */ }
-export async function POST() { /* ... */ }
-export async function PUT() { /* ... */ }
-export async function DELETE() { /* ... */ }
+export async function GET() {
+  /* ... */
+}
+export async function POST() {
+  /* ... */
+}
+export async function PUT() {
+  /* ... */
+}
+export async function DELETE() {
+  /* ... */
+}
 ```
 
 ## Deployment
@@ -381,6 +400,7 @@ Vercel will give you a URL where your app is hosted (like https://your-app-name.
 If you want to run the production version on your Mac:
 
 1. Build the project:
+
    ```bash
    npm run build
    ```
@@ -404,21 +424,21 @@ Here's an example of how the API routes are structured using the App Router patt
 
 ```typescript
 // src/app/api/todos/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { TodoInput } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { TodoInput } from "@/types";
 
 // GET /api/todos - Get all todos
 export async function GET(request: NextRequest) {
   try {
     const todos = await prisma.todo.findMany({
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
     return NextResponse.json(todos);
   } catch (error) {
-    console.error('Error fetching todos:', error);
+    console.error("Error fetching todos:", error);
     return NextResponse.json(
-      { error: 'Failed to fetch todos' },
+      { error: "Failed to fetch todos" },
       { status: 500 }
     );
   }
@@ -427,27 +447,24 @@ export async function GET(request: NextRequest) {
 // POST /api/todos - Create a new todo
 export async function POST(request: NextRequest) {
   try {
-    const data = await request.json() as TodoInput;
-    
-    if (!data.title || data.title.trim() === '') {
-      return NextResponse.json(
-        { error: 'Title is required' },
-        { status: 400 }
-      );
+    const data = (await request.json()) as TodoInput;
+
+    if (!data.title || data.title.trim() === "") {
+      return NextResponse.json({ error: "Title is required" }, { status: 400 });
     }
 
     const todo = await prisma.todo.create({
       data: {
         title: data.title,
         description: data.description || null,
-      }
+      },
     });
-    
+
     return NextResponse.json(todo, { status: 201 });
   } catch (error) {
-    console.error('Error creating todo:', error);
+    console.error("Error creating todo:", error);
     return NextResponse.json(
-      { error: 'Failed to create todo' },
+      { error: "Failed to create todo" },
       { status: 500 }
     );
   }
@@ -458,9 +475,9 @@ export async function POST(request: NextRequest) {
 
 ```typescript
 // src/app/api/todos/[id]/route.ts
-import { NextRequest, NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
-import { TodoUpdateInput } from '@/types';
+import { NextRequest, NextResponse } from "next/server";
+import prisma from "@/lib/prisma";
+import { TodoUpdateInput } from "@/types";
 
 // PUT /api/todos/[id] - Update a todo
 export async function PUT(
@@ -469,32 +486,29 @@ export async function PUT(
 ) {
   const todoId = Number(params.id);
   if (isNaN(todoId)) {
-    return NextResponse.json(
-      { error: 'Invalid todo ID' },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid todo ID" }, { status: 400 });
   }
 
   try {
-    const data = await request.json() as TodoUpdateInput;
-    
-    if (data.title !== undefined && data.title.trim() === '') {
+    const data = (await request.json()) as TodoUpdateInput;
+
+    if (data.title !== "" && data.title.trim() === "") {
       return NextResponse.json(
-        { error: 'Title cannot be empty' },
+        { error: "Title cannot be empty" },
         { status: 400 }
       );
     }
 
     const updatedTodo = await prisma.todo.update({
       where: { id: todoId },
-      data
+      data,
     });
-    
+
     return NextResponse.json(updatedTodo);
   } catch (error) {
-    console.error('Error updating todo:', error);
+    console.error("Error updating todo:", error);
     return NextResponse.json(
-      { error: 'Failed to update todo' },
+      { error: "Failed to update todo" },
       { status: 500 }
     );
   }

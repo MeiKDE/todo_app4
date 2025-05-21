@@ -4,54 +4,9 @@ import { Todo, TodoAddInput, TodoUpdateInput } from "@/types/index";
 import TodoForm from "@/components/TodoForm";
 import TodoList from "@/components/TodoList";
 
-// Create useEditingGlobalError hook to wrap isEditing and globalError states and withGlobalErrorHandling wrapper function.
-// const useEditingGlobalError = () => {
-//   const [isEditing, setIsEditing] = useState<boolean>(false);
-//   const [globalError, setGlobalError] = useState<string>("");
-//   // Create a withLoadingError wrapper for DRY coding purpose
-//   const withGlobalErrorHandling = async (operation: () => Promise<void>) => {
-//     setGlobalError("");
-//     setIsEditing(true);
-//     try {
-//       // Call API
-//       const response = await operation();
-//     } catch (err) {
-//       //check for unexpected global error
-//       const errorMessage =
-//         err instanceof Error ? err.message : "An unexpected error has occurred";
-//       setGlobalError(errorMessage);
-//       console.error("Operation failed:", err);
-//     } finally {
-//       setIsEditing(false);
-//     }
-//   };
-//   return { isEditing, globalError, withGlobalErrorHandling, setGlobalError };
-// };
-
-// // Create a withLoadingError wrapper for DRY coding purpose
-// const withGlobalErrorHandling = async (operation: () => Promise<void>) => {
-//   const [isEditing, setIsEditing] = useState<boolean>(false);
-//   const [globalError, setGlobalError] = useState<string>("");
-//   setGlobalError("");
-//   setIsEditing(true);
-//   try {
-//     // Call API
-//     const response = await operation();
-//   } catch (err) {
-//     //check for unexpected global error
-//     const errorMessage =
-//       err instanceof Error ? err.message : "An unexpected error has occurred";
-//     setGlobalError(errorMessage);
-//     console.error("Operation failed:", err);
-//   } finally {
-//     setIsEditing(false);
-//   }
-// };
-
 const Home = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
-  //Create CRUD API Calls
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [globalError, setGlobalError] = useState<string>("");
   const [httpError, setHttpError] = useState<string>("");
 
@@ -63,71 +18,83 @@ const Home = () => {
   // READ - make GET API call to render todo data
   const getDataHandler = async () => {
     setGlobalError("");
-    setIsEditing(true);
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/todos");
 
-    // Call API
-    const response = await fetch("/api/todos");
+      if (!response.ok) {
+        let message = "Failed to fetch todos";
 
-    // Validate HTTP error
-    if (!response.ok) {
-      //creating an object that can optionally hold an error message as a string,
-      // but starts off empty.
-      let errorData: { error?: string } = {};
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-        throw new Error(errorData?.error || "Failed to fetch todos");
-      } finally {
-        setGlobalError(errorData?.error || "Unexpected error has occurred");
-        console.error(
-          "Unexpected error has occurred to fetch todos",
-          errorData
-        );
-        setIsEditing(false);
+        try {
+          const errorData = await response.json();
+
+          if (errorData?.error) {
+            message = errorData.error;
+            setHttpError(message); // HTTP error returned by backend (e.g. 400/500)
+          } else {
+            setGlobalError(message); // Unexpected structure in error response
+          }
+        } catch (parseErr) {
+          console.warn("Failed to parse error JSON", parseErr);
+          setGlobalError("Unexpected error format from server."); // Parsing failure
+        }
+
+        setIsLoading(false);
+        console.error("Fetch error:", message);
+        throw new Error(message); // Let outer try/catch handle it
       }
+
+      // ✅ success: parse and use data
+      const todos = await response.json();
+      setTodos(todos);
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Unexpected error while fetching todos:", err);
+      setGlobalError("A network or system error occurred. Please try again.");
+      setIsLoading(false);
     }
-
-    // If no error
-    const data = await response.json();
-    setTodos(data);
   };
-
-  // //useCallback is used to avoid children components from being re-rendered
-  // const getDataHandler = useCallback(() => {}, []);
 
   // CREATE a new todo
   const createTodoHandler = async (todoAddInput: TodoAddInput) => {
     setGlobalError("");
-    setIsEditing(true);
+    setIsLoading(true);
+    try {
+      const response = await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todoAddInput),
+      });
 
-    // Call API
-    const response = await fetch("/api/todos", {
-      method: "POST",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(todoAddInput),
-    });
+      if (!response.ok) {
+        let message = "Failed to create todo";
 
-    // Validate HTTP error
-    if (!response.ok) {
-      //creating an object that can optionally hold an error message as a string,
-      // but starts off empty.
-      let errorData: { error?: string } = {};
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      } finally {
-        setGlobalError(errorData?.error || "Failed to create todos");
-        console.error("Global error unable to create todos", errorData);
-        setIsEditing(false);
-        throw new Error(errorData?.error || "Failed to create todos");
+        try {
+          const errorData = await response.json();
+          if (errorData?.error) {
+            message = errorData.error;
+            setHttpError(message);
+          } else {
+            setGlobalError(message);
+          }
+        } catch (parseErr) {
+          console.warn("Failed to parse error response JSON", parseErr);
+          setGlobalError("Unexpected error format from server.");
+        }
+
+        setIsLoading(false);
+        console.error("Error creating todo:", message);
+        throw new Error(message);
       }
-    }
 
-    // If no error
-    const data = await response.json();
-    setTodos((prev) => [data, ...prev]); //prepend
+      const data = await response.json();
+      setTodos((prev) => [data, ...prev]);
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Unexpected error while creating todo:", err);
+      setGlobalError("A network or system error occurred. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   // UPDATE todo
@@ -136,73 +103,120 @@ const Home = () => {
     todoUpdateInput: TodoUpdateInput
   ) => {
     setGlobalError("");
-    setIsEditing(true);
+    setIsLoading(true);
 
-    // Call API
-    const response = await fetch(`/api/todos/${id}`, {
-      method: "PUT",
-      headers: { "Content-type": "application/json" },
-      body: JSON.stringify(todoUpdateInput),
-    });
+    try {
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todoUpdateInput),
+      });
 
-    // Validate HTTP error
-    if (!response.ok) {
-      //creating an object that can optionally hold an error message as a string,
-      // but starts off empty.
-      let errorData: { error?: string } = {};
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      } finally {
-        setGlobalError(errorData?.error || "Failed to create todos");
-        console.error("Global error unable to create todos", errorData);
-        setIsEditing(false);
-        throw new Error(errorData?.error || "Failed to create todos");
+      if (!response.ok) {
+        let message = "Failed to update todo";
+
+        try {
+          const errorData = await response.json();
+          if (errorData?.error) {
+            message = errorData.error;
+            setHttpError(message);
+          } else {
+            setGlobalError(message);
+          }
+        } catch (parseErr) {
+          console.warn("Failed to parse error response JSON", parseErr);
+          setGlobalError("Unexpected error format from server.");
+        }
+
+        setIsLoading(false);
+        console.error("Error updating todo:", message);
+        throw new Error(message);
       }
-    }
 
-    // If no error
-    const updatedData = await response.json();
-    setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
+      const updatedData = await response.json();
+      setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Unexpected error while updating todo:", err);
+      setGlobalError("A network or system error occurred. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   // DELETE todo
   const deleteTodoHandler = async (id: number) => {
     setGlobalError("");
-    setIsEditing(true);
+    setIsLoading(true);
 
-    // Call API
-    const response = await fetch(`/api/todos/${id}`, {
-      method: "DELETE",
-      headers: { "Content-type": "application/json" },
-    });
+    try {
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
 
-    // Validate HTTP error
-    if (!response.ok) {
-      //creating an object that can optionally hold an error message as a string,
-      // but starts off empty.
-      let errorData: { error?: string } = {};
-      try {
-        errorData = await response.json();
-      } catch {
-        errorData = {};
-      } finally {
-        setGlobalError(errorData?.error || "Failed to create todos");
-        console.error("Global error unable to create todos", errorData);
-        setIsEditing(false);
-        throw new Error(errorData?.error || "Failed to create todos");
+      if (!response.ok) {
+        let message = "Failed to delete todo";
+
+        try {
+          const errorData = await response.json();
+          if (errorData?.error) {
+            message = errorData.error;
+            setHttpError(message);
+          } else {
+            setGlobalError(message);
+          }
+        } catch (parseErr) {
+          console.warn("Failed to parse error response JSON", parseErr);
+          setGlobalError("Unexpected error format from server.");
+        }
+
+        setIsLoading(false);
+        console.error("Error deleting todo:", message);
+        throw new Error(message);
       }
+
+      setTodos(todos.filter((todo) => todo.id !== id));
+      setIsLoading(false);
+    } catch (err) {
+      console.error("Unexpected error while deleting todo:", err);
+      setGlobalError("A network or system error occurred. Please try again.");
+      setIsLoading(false);
     }
-    // If no error
-    setTodos(todos.filter((todo) => todo.id != id));
+  };
+
+  const renderLoadingSpinner = () => {
+    return (
+      <div className="flex justify-center items-center py-10">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
+      </div>
+    );
+  };
+  const renderEmptySpace = () => {
+    return (
+      <div className="bg-white p-6 rounded-lg shadow-md text-center">
+        <p className="text-gray-600">Empty list. Create your first todo.</p>
+      </div>
+    );
   };
 
   return (
     <section className="flex flex-row gap-4 p-4">
-      <TodoForm createTodoHandler={createTodoHandler} />
-      {/*flex-1 take up equal width*/}
-      <TodoList todos={todos} />
+      {isLoading ? (
+        renderLoadingSpinner()
+      ) : (
+        <>
+          <TodoForm createTodoHandler={createTodoHandler} />
+          {todos.length === 0 ? (
+            renderEmptySpace()
+          ) : (
+            <TodoList
+              todos={todos}
+              updateTodoHandler={updateTodoHandler}
+              deleteTodoHandler={deleteTodoHandler}
+            />
+          )}
+        </>
+      )}
     </section>
   );
 };

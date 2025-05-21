@@ -17,13 +17,12 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className} suppressHydrationWarning>
-        <section>
-          <div id="header">
-            <h1 className="text-3xl">Mei's Todo App</h1>
-          </div>
-
-          <div id="children_components">{children}</div>
-        </section>
+        <main className="min-h-screen">
+          <header className="p-4">
+            <h1 className="text-3xl font-bold">Mei's Todo App</h1>
+          </header>
+          {children}
+        </main>
       </body>
     </html>
   );

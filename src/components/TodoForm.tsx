@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+import React, { useState } from "react";
 import { TodoAddInput } from "@/types";
 interface TodoFormProps {
   createTodoHandler: (todoAddInput: TodoAddInput) => void;
@@ -7,14 +8,12 @@ interface TodoFormProps {
 const TodoForm = ({ createTodoHandler }: TodoFormProps) => {
   const [formError, setFormError] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-
-  // To be used by both TodoForm and TodoList components
   const [todoTitle, setTodoTitle] = useState<string>("");
   const [todoDescription, setTodoDescription] = useState<string>("");
 
   // Add/Submit form including required field validation
   const submitTodoHandler = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault; //prevent page refresh
+    e.preventDefault(); //prevent page refresh
     setFormError("");
 
     // Validate required title field
@@ -43,6 +42,7 @@ const TodoForm = ({ createTodoHandler }: TodoFormProps) => {
       <div id="ford-header">
         <h1 className=" border border-gray-400 text-2xl">To Do Form:</h1>
       </div>
+      <div>{formError && <div className="text-red-500">{formError}</div>}</div>
       <form
         onSubmit={submitTodoHandler}
         className="flex flex-col gap-4 bg-slate-50"
