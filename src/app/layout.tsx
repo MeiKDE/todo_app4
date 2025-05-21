@@ -1,0 +1,30 @@
+import "@/styles/globals.css";
+import { Inter } from "next/font/google";
+import { Metadata } from "next";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata: Metadata = {
+  title: "Mei's Todo App",
+  description: "A simple todo application",
+};
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <body className={inter.className} suppressHydrationWarning>
+        <section>
+          <div id="header">
+            <h1 className="text-3xl">Mei's Todo App</h1>
+          </div>
+
+          <div id="children_components">{children}</div>
+        </section>
+      </body>
+    </html>
+  );
+}

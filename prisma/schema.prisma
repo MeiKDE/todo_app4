@@ -1,0 +1,24 @@
+// This is your Prisma schema file,
+// it defines the data model, data source, and client generator.
+// Docs: https://pris.ly/d/prisma-schema
+
+// Generator block tells Prisma which client to generate
+generator client {
+  provider = "prisma-client-js" // Use the default JavaScript/TypeScript client
+}
+
+// Datasource block configures your connection to the database
+datasource db {
+  provider = "postgresql"          // Use PostgreSQL as the database engine
+  url      = env("DATABASE_URL")   // Load the connection string from environment variables
+}
+
+// Model definition for the 'Todo' table
+model Todo {
+  id          Int      @id @default(autoincrement()) // Primary key, auto-incrementing integer
+  title       String                                // Required title field (non-nullable)
+  description String?                               // Optional description field (nullable)
+  completed   Boolean  @default(false)              // Tracks completion status, defaults to false
+  createdAt   DateTime @default(now())              // Automatically sets to current timestamp on create
+  updatedAt   DateTime @updatedAt                   // Automatically updates on any model update
+}
