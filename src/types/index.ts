@@ -20,3 +20,9 @@ export type TodoUpdateInput = {
   completed: boolean;
   updatedAt: Date;
 };
+
+export type ErrorHandlers = {
+  fallbackMessage: string;
+  setHttpError: (msg: string) => void;
+  setGlobalError: (msg: string) => void;
+};
