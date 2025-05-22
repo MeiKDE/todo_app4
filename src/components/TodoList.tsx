@@ -21,12 +21,12 @@ const TodoList = ({
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingTodoId, setEditingTodoId] = useState<number>(0);
 
-  const onClickDisplayList = (todoId: number) => {
+  const enterEditMode = (todoId: number) => {
     setEditingTodoId(todoId);
     setIsEditing(true);
   };
 
-  const onClickEditItem = (todoId: number) => {
+  const exitEditMode = (todoId: number) => {
     setEditingTodoId(todoId);
     setIsEditing(false);
   };
@@ -43,13 +43,13 @@ const TodoList = ({
             updateTodoHandler={(updateInput) =>
               updateTodoHandler(todo.id, updateInput)
             }
-            onClickEditItem={() => onClickEditItem(todo.id)}
+            exitEditMode={() => exitEditMode(todo.id)}
           />
         ) : (
           <DisplayList
             key={todo.id}
             todo={todo}
-            onClickDisplayList={() => onClickDisplayList(todo.id)}
+            enterEditMode={() => enterEditMode(todo.id)}
             deleteTodoHandle={() => deleteTodoHandler(todo.id)}
           />
         )

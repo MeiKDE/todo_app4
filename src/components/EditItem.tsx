@@ -1,3 +1,4 @@
+import React from "react";
 import { Todo, TodoUpdateInput } from "@/types";
 import { useState } from "react";
 import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
@@ -5,14 +6,10 @@ import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
 interface EditItemProps {
   todo: Todo;
   updateTodoHandler: (updateInput: TodoUpdateInput) => Promise<void>;
-  onClickEditItem: () => void;
+  exitEditMode: () => void;
 }
 
-const EditItem = ({
-  todo,
-  updateTodoHandler,
-  onClickEditItem,
-}: EditItemProps) => {
+const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
   const [todoTitle, setTodoTitle] = useState<string>(todo.title);
   const [todoDescription, setTodoDescription] = useState<string>(
     todo.description || ""
@@ -35,7 +32,7 @@ const EditItem = ({
         updatedAt: new Date(),
       };
       await updateTodoHandler(updateInput);
-      onClickEditItem();
+      exitEditMode();
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update todo";
@@ -47,7 +44,7 @@ const EditItem = ({
     setTodoTitle(todo.title);
     setTodoDescription(todo.description || "");
     setError("");
-    onClickEditItem();
+    exitEditMode();
   };
 
   return (

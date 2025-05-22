@@ -3,13 +3,13 @@ import { formStyles, buttonStyles } from "@/styles/common";
 
 interface DisplayListProps {
   todo: Todo;
-  onClickDisplayList: () => void;
+  enterEditMode: () => void;
   deleteTodoHandle: () => void;
 }
 
 const DisplayList = ({
   todo,
-  onClickDisplayList,
+  enterEditMode,
   deleteTodoHandle,
 }: DisplayListProps) => {
   return (
@@ -26,7 +26,7 @@ const DisplayList = ({
         <p>Created: {new Date(todo.createdAt).toLocaleString()}</p>
       </div>
       <div className="flex gap-2">
-        <button onClick={onClickDisplayList} className={buttonStyles.primary}>
+        <button onClick={enterEditMode} className={buttonStyles.primary}>
           Edit
         </button>
         <button onClick={deleteTodoHandle} className={buttonStyles.danger}>

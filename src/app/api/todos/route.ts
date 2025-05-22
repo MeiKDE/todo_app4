@@ -5,7 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import prisma from "@/lib/prisma";
 
 // Import the type definition for input when creating a new todo
-import { TodoInput } from "@/types";
+import { TodoAddInput } from "@/types";
 
 // -----------------------------------------------------
 // GET /api/todos - Retrieve all todo items
@@ -35,7 +35,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     // Parse the request body as JSON and cast it to the TodoInput type
-    const data = (await request.json()) as TodoInput;
+    const data = (await request.json()) as TodoAddInput;
 
     // Validate that the title is provided and not just whitespace
     if (!data.title || data.title.trim() === "") {

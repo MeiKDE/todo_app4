@@ -41,8 +41,8 @@ const Home = () => {
     <>
       {(globalError || httpError) && (
         <div>
-          {httpError}
           {globalError}
+          {httpError}
         </div>
       )}
 
