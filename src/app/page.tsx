@@ -1,64 +1,165 @@
 "use client";
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { Todo, TodoAddInput, TodoUpdateInput } from "@/types/index";
 import TodoForm from "@/components/TodoForm";
 import TodoList from "@/components/TodoList";
-import { useTodos } from "@/hooks/useTodos";
 
 const Home = () => {
-  const {
-    todos,
-    isLoading,
-    globalError,
-    httpError,
-    getTodos,
-    createTodo,
-    updateTodo,
-    deleteTodo,
-  } = useTodos();
-
-  // Load initial data when component mounts
-  useEffect(() => {
-    getTodos();
-  }, [getTodos]);
+  const [httpError, setHttpError] = useState("");
+  const [globalError, setGlobalError] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [todos, setTodos] = useState<Todo[]>([]);
 
   const renderLoadingSpinner = () => {
     return (
-      <div className="flex justify-center items-center py-10">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-indigo-500"></div>
-      </div>
+      <div className="animate-spin h-5 w-5 border-t-2 border-b-2 border-gray-900 rounded-full"></div>
     );
   };
 
   const renderEmptySpace = () => {
     return (
-      <div className="bg-white p-6 rounded-lg shadow-md text-center">
-        <p className="text-gray-600">Empty list. Create your first todo.</p>
+      <div className="text-gray-500">
+        No todos yet. Create one to get started!
       </div>
     );
   };
 
+  //CRUD - Create, Read, Update, Delete API calls
+  // Create - POST a new todo
+  const createTodoHandler = async (todoAddInput: TodoAddInput) => {
+    // Set default values
+    setHttpError("");
+    setGlobalError("");
+
+    try {
+      // Post data call
+      const response = await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todoAddInput),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data?.error || "An http error occurred";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage);
+      }
+      setTodos((prev) => [data, ...prev]);
+    } catch (err) {
+      console.error("Failed to create todo:", err);
+      setGlobalError("A network or system error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Move getDataHandler before useEffect
+  const getDataHandler = async () => {
+    // Set default values
+    setHttpError("");
+    setGlobalError("");
+
+    try {
+      // Fetch data call
+      const response = await fetch("/api/todos");
+      const data = await response.json();
+
+      if (!response.ok) {
+        const errorMessage = data?.error || "An http error occurred";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage);
+      }
+      setTodos(data);
+    } catch (err) {
+      console.error("Failed to fetch todos:", err);
+      setGlobalError("A network or system error occurred. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Fix useEffect syntax
+  useEffect(() => {
+    getDataHandler();
+  }, []); // Empty dependency array since getDataHandler is defined in component
+
+  // Update - PUT an existing todo by id
+  const updateTodoHandler = async (
+    id: number,
+    todoUpdateInput: TodoUpdateInput
+  ) => {
+    // Set default values
+    setHttpError("");
+    setGlobalError("");
+
+    try {
+      // Fetch data call
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todoUpdateInput),
+      });
+      const updatedData = await response.json();
+
+      // Check Http
+      if (!response.ok) {
+        const errorMessage = updatedData?.error || "An http error occurred";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage);
+      }
+      setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
+    } catch (err) {
+      console.error("Failed to update todos:", err);
+      setGlobalError("A network or system error occurred.  Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Delete - DELETE todo by id
+  const deleteTodoHandler = async (id: number) => {
+    // Set default values
+    setHttpError("");
+    setGlobalError("");
+
+    try {
+      // Fetch data call
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      // Check Http
+      if (!response.ok) {
+        const errorMessage = "Failed to delete todo";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage);
+      }
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (err) {
+      console.error("Failed to delete todos:", err);
+      setGlobalError("A network or system error occurred.  Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   return (
     <>
-      {(globalError || httpError) && (
-        <div>
-          {globalError}
-          {httpError}
-        </div>
-      )}
-
       <section className="flex flex-row gap-4 p-4">
         {isLoading ? (
           renderLoadingSpinner()
         ) : (
           <>
-            <TodoForm createTodoHandler={createTodo} />
+            <TodoForm createTodo={createTodoHandler} />
             {todos.length === 0 ? (
               renderEmptySpace()
             ) : (
               <TodoList
                 todos={todos}
-                updateTodoHandler={updateTodo}
-                deleteTodoHandler={deleteTodo}
+                updateTodo={updateTodoHandler}
+                deleteTodo={deleteTodoHandler}
               />
             )}
           </>

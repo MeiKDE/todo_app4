@@ -2,37 +2,33 @@
 import React, { useState } from "react";
 import { TodoAddInput } from "@/types";
 import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
+import { create } from "domain";
+import TodoList from "./TodoList";
 
 interface TodoFormProps {
-  createTodoHandler: (todoAddInput: TodoAddInput) => void;
+  createTodo: (todoAddInput: TodoAddInput) => void;
 }
 
-const TodoForm = ({ createTodoHandler }: TodoFormProps) => {
+const TodoForm = ({ createTodo }: TodoFormProps) => {
   const [formError, setFormError] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [todoTitle, setTodoTitle] = useState<string>("");
   const [todoDescription, setTodoDescription] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  // Add/Submit form including required field validation
-  const submitTodoHandler = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); //prevent page refresh
+  const submitTodo = async () => {
     setFormError("");
-
-    // Validate required title field
-    if (!todoTitle.trim()) {
-      setFormError("Title is required.");
-      return;
-    }
-
-    setIsSubmitting(true);
-
     try {
-      await createTodoHandler({
+      if (!todoTitle.trim()) {
+        setFormError("Title is required");
+        return;
+      }
+      await createTodo({
         title: todoTitle.trim(),
         description: todoDescription.trim(),
         createdAt: new Date(),
       });
-    } catch {
+      setIsSubmitting(true);
+    } catch (err) {
       setFormError("Failed to create todo");
     } finally {
       setIsSubmitting(false);
@@ -45,7 +41,7 @@ const TodoForm = ({ createTodoHandler }: TodoFormProps) => {
         <h1 className="text-2xl font-bold mb-4">To Do Form:</h1>
       </div>
       {formError && <div className={formStyles.error}>{formError}</div>}
-      <form onSubmit={submitTodoHandler} className={formStyles.container}>
+      <form onSubmit={submitTodo} className={formStyles.container}>
         <div className={formStyles.field}>
           <label className={formStyles.label}>Title *</label>
           <input

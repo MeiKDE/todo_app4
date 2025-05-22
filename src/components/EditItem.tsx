@@ -5,24 +5,27 @@ import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
 
 interface EditItemProps {
   todo: Todo;
-  updateTodoHandler: (updateInput: TodoUpdateInput) => Promise<void>;
+  onUpdate: (todoUpdateInput: TodoUpdateInput) => Promise<void>;
   exitEditMode: () => void;
+  enterEditMode: () => void;
 }
 
-const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
-  const [todoTitle, setTodoTitle] = useState<string>(todo.title);
-  const [todoDescription, setTodoDescription] = useState<string>(
-    todo.description || ""
-  );
-  const [error, setError] = useState<string>("");
+const EditItem = ({
+  todo,
+  onUpdate,
+  exitEditMode,
+  enterEditMode,
+}: EditItemProps) => {
+  const [error, setError] = useState("");
+  const [todoTitle, setTodoTitle] = useState("");
+  const [todoDescription, setTodoDescription] = useState("");
 
-  const saveEdit = async () => {
+  const onSave = async () => {
     //Check for required field
     if (!todoTitle.trim()) {
-      setError("Title is required.");
+      setError("This field is required.");
       return;
     }
-
     try {
       const updateInput: TodoUpdateInput = {
         id: todo.id,
@@ -31,20 +34,21 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
         completed: !todo.completed,
         updatedAt: new Date(),
       };
-      await updateTodoHandler(updateInput);
-      exitEditMode();
+      await onUpdate(updateInput);
+      exitEditMode;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update todo";
       setError(errorMessage);
+      console.error("onSave function failed to update todo");
     }
   };
 
-  const cancelEdit = () => {
-    setTodoTitle(todo.title);
-    setTodoDescription(todo.description || "");
+  const onCancel = () => {
     setError("");
-    exitEditMode();
+    setTodoTitle(todoTitle);
+    setTodoDescription(todoDescription);
+    enterEditMode();
   };
 
   return (
@@ -53,7 +57,9 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
       <div className={formStyles.field}>
         <label className={formStyles.label}>Title</label>
         <input
-          onChange={(e) => setTodoTitle(e.target.value)}
+          onChange={(e) => {
+            setTodoTitle(e.target.value);
+          }}
           value={todoTitle}
           placeholder="Enter title"
           className={`${inputStyles.base} ${error ? inputStyles.error : ""}`}
@@ -62,21 +68,23 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
       <div className={formStyles.field}>
         <label className={formStyles.label}>Description</label>
         <input
-          onChange={(e) => setTodoDescription(e.target.value)}
+          onChange={(e) => {
+            setTodoDescription(e.target.value);
+          }}
           value={todoDescription}
           placeholder="Enter description"
           className={inputStyles.base}
         />
       </div>
       <div className="text-sm text-gray-600">
-        <p>Created: {new Date(todo.createdAt).toLocaleString()}</p>
-        <p>Updated: {new Date(todo.updatedAt).toLocaleString()}</p>
+        <p>Created: new Date(todo.createdAt).toLocaleString()</p>
+        <p>Updated: new Date(todo.updatedAt).toLocaleString()</p>
       </div>
       <div className="flex gap-2">
-        <button onClick={saveEdit} className={buttonStyles.primary}>
+        <button onClick={onSave} className={buttonStyles.primary}>
           Save
         </button>
-        <button onClick={cancelEdit} className={buttonStyles.primary}>
+        <button onClick={onCancel} className={buttonStyles.primary}>
           Cancel
         </button>
       </div>

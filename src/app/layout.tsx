@@ -6,24 +6,20 @@ const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "Mei's Todo App",
-  description: "A simple todo application",
+  description: "Using Next.js, Tailwind and PostgreSQL",
 };
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={inter.className} suppressHydrationWarning>
-        <main className="min-h-screen">
-          <header className="p-4">
-            <h1 className="text-3xl font-bold">Mei's Todo App</h1>
-          </header>
-          {children}
-        </main>
+    <html lang="en">
+      <body className={`${inter.className}`}>
+        <div suppressHydrationWarning>
+          <header>Welcome to Mei's Todo App</header>
+          <main>{children}</main>
+        </div>
       </body>
     </html>
   );
-}
+};
+
+export default RootLayout;

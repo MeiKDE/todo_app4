@@ -4,14 +4,10 @@ import { formStyles, buttonStyles } from "@/styles/common";
 interface DisplayListProps {
   todo: Todo;
   enterEditMode: () => void;
-  deleteTodoHandle: () => void;
+  onDelete: () => void;
 }
 
-const DisplayList = ({
-  todo,
-  enterEditMode,
-  deleteTodoHandle,
-}: DisplayListProps) => {
+const DisplayList = ({ todo, enterEditMode, onDelete }: DisplayListProps) => {
   return (
     <div className={formStyles.container}>
       <div className={formStyles.field}>
@@ -29,7 +25,7 @@ const DisplayList = ({
         <button onClick={enterEditMode} className={buttonStyles.primary}>
           Edit
         </button>
-        <button onClick={deleteTodoHandle} className={buttonStyles.danger}>
+        <button onClick={onDelete} className={buttonStyles.danger}>
           Delete
         </button>
       </div>

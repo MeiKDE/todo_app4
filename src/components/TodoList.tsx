@@ -6,18 +6,11 @@ import DisplayList from "@/components/DisplayList";
 
 interface TodoListProps {
   todos: Todo[];
-  updateTodoHandler: (
-    id: number,
-    todoUpdateInput: TodoUpdateInput
-  ) => Promise<void>;
-  deleteTodoHandler: (id: number) => Promise<void>;
+  updateTodo: (id: number, todoUpdateInput: TodoUpdateInput) => Promise<void>;
+  deleteTodo: (id: number) => Promise<void>;
 }
 
-const TodoList = ({
-  todos,
-  updateTodoHandler,
-  deleteTodoHandler,
-}: TodoListProps) => {
+const TodoList = ({ todos, updateTodo, deleteTodo }: TodoListProps) => {
   const [isEditing, setIsEditing] = useState<boolean>(false);
   const [editingTodoId, setEditingTodoId] = useState<number>(0);
 
@@ -30,7 +23,6 @@ const TodoList = ({
     setEditingTodoId(todoId);
     setIsEditing(false);
   };
-
   return (
     <section id="todo-list" className="flex-1">
       <h1 className="text-2xl font-bold mb-4">To Do List:</h1>
@@ -40,17 +32,16 @@ const TodoList = ({
           <EditItem
             key={todo.id}
             todo={todo}
-            updateTodoHandler={(updateInput) =>
-              updateTodoHandler(todo.id, updateInput)
-            }
+            onUpdate={(todoUpdateInput) => updateTodo(todo.id, todoUpdateInput)}
             exitEditMode={() => exitEditMode(todo.id)}
+            enterEditMode={() => enterEditMode(todo.id)}
           />
         ) : (
           <DisplayList
             key={todo.id}
             todo={todo}
             enterEditMode={() => enterEditMode(todo.id)}
-            deleteTodoHandle={() => deleteTodoHandler(todo.id)}
+            onDelete={() => deleteTodo(todo.id)}
           />
         )
       )}
