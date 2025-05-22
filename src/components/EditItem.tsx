@@ -16,7 +16,7 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
   );
   const [error, setError] = useState<string>("");
 
-  const onSave = async () => {
+  const saveEdit = async () => {
     //Check for required field
     if (!todoTitle.trim()) {
       setError("Title is required.");
@@ -28,7 +28,7 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
         id: todo.id,
         title: todoTitle,
         description: todoDescription || "",
-        completed: todo.completed,
+        completed: !todo.completed,
         updatedAt: new Date(),
       };
       await updateTodoHandler(updateInput);
@@ -40,7 +40,7 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
     }
   };
 
-  const onCancel = () => {
+  const cancelEdit = () => {
     setTodoTitle(todo.title);
     setTodoDescription(todo.description || "");
     setError("");
@@ -73,10 +73,10 @@ const EditItem = ({ todo, updateTodoHandler, exitEditMode }: EditItemProps) => {
         <p>Updated: {new Date(todo.updatedAt).toLocaleString()}</p>
       </div>
       <div className="flex gap-2">
-        <button onClick={onSave} className={buttonStyles.primary}>
+        <button onClick={saveEdit} className={buttonStyles.primary}>
           Save
         </button>
-        <button onClick={onCancel} className={buttonStyles.primary}>
+        <button onClick={cancelEdit} className={buttonStyles.primary}>
           Cancel
         </button>
       </div>
