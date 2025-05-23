@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 const RootLayout = ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en">
-      <body className={`${inter.className}`}>
+      <body className={inter.className}>
         <div suppressHydrationWarning>
           <header>Welcome to Mei's Todo App</header>
           <main>{children}</main>

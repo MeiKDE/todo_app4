@@ -7,18 +7,12 @@ interface EditItemProps {
   todo: Todo;
   onUpdate: (todoUpdateInput: TodoUpdateInput) => Promise<void>;
   exitEditMode: () => void;
-  enterEditMode: () => void;
 }
 
-const EditItem = ({
-  todo,
-  onUpdate,
-  exitEditMode,
-  enterEditMode,
-}: EditItemProps) => {
+const EditItem = ({ todo, onUpdate, exitEditMode }: EditItemProps) => {
   const [error, setError] = useState("");
-  const [todoTitle, setTodoTitle] = useState("");
-  const [todoDescription, setTodoDescription] = useState("");
+  const [todoTitle, setTodoTitle] = useState(todo.title);
+  const [todoDescription, setTodoDescription] = useState(todo.description);
 
   const onSave = async () => {
     //Check for required field
@@ -35,20 +29,21 @@ const EditItem = ({
         updatedAt: new Date(),
       };
       await onUpdate(updateInput);
-      exitEditMode;
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update todo";
       setError(errorMessage);
       console.error("onSave function failed to update todo");
+    } finally {
+      exitEditMode();
     }
   };
 
   const onCancel = () => {
     setError("");
-    setTodoTitle(todoTitle);
-    setTodoDescription(todoDescription);
-    enterEditMode();
+    setTodoTitle(todo.title);
+    setTodoDescription(todo.description);
+    exitEditMode();
   };
 
   return (

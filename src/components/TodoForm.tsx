@@ -15,7 +15,8 @@ const TodoForm = ({ createTodo }: TodoFormProps) => {
   const [todoDescription, setTodoDescription] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
 
-  const submitTodo = async () => {
+  const submitTodo = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault(); // prevent page from refreshing
     setFormError("");
     try {
       if (!todoTitle.trim()) {

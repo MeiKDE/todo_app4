@@ -6,11 +6,7 @@ module.exports = {
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    extend: {
-      // You can add custom theme extensions here
-    },
+    extend: {},
   },
   plugins: [],
-  // Enable JIT mode
-  mode: "jit",
 };

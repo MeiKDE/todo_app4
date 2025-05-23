@@ -147,6 +147,15 @@ const Home = () => {
   };
   return (
     <>
+      <section className="text-red-500">
+        {(httpError || globalError) && (
+          <div>
+            {httpError && <div>{httpError}</div>}
+            {globalError && <div>{globalError}</div>}
+          </div>
+        )}
+      </section>
+
       <section className="flex flex-row gap-4 p-4">
         {isLoading ? (
           renderLoadingSpinner()

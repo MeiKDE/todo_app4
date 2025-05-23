@@ -11,7 +11,7 @@ interface TodoListProps {
 }
 
 const TodoList = ({ todos, updateTodo, deleteTodo }: TodoListProps) => {
-  const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [isEditing, setIsEditing] = useState<boolean>(false); // used for toggling pages
   const [editingTodoId, setEditingTodoId] = useState<number>(0);
 
   const enterEditMode = (todoId: number) => {
@@ -34,7 +34,6 @@ const TodoList = ({ todos, updateTodo, deleteTodo }: TodoListProps) => {
             todo={todo}
             onUpdate={(todoUpdateInput) => updateTodo(todo.id, todoUpdateInput)}
             exitEditMode={() => exitEditMode(todo.id)}
-            enterEditMode={() => enterEditMode(todo.id)}
           />
         ) : (
           <DisplayList
