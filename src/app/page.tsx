@@ -47,6 +47,7 @@ const Home = () => {
         throw new Error(errorMessage);
       }
       setTodos((prev) => [data, ...prev]);
+      setIsLoading(true);
     } catch (err) {
       console.error("Failed to create todo:", err);
       setGlobalError("A network or system error occurred. Please try again.");
@@ -72,6 +73,7 @@ const Home = () => {
         throw new Error(errorMessage);
       }
       setTodos(data);
+      setIsLoading(true);
     } catch (err) {
       console.error("Failed to fetch todos:", err);
       setGlobalError("A network or system error occurred. Please try again.");
@@ -110,6 +112,7 @@ const Home = () => {
         throw new Error(errorMessage);
       }
       setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
+      setIsLoading(true);
     } catch (err) {
       console.error("Failed to update todos:", err);
       setGlobalError("A network or system error occurred.  Please try again.");
@@ -138,6 +141,7 @@ const Home = () => {
         throw new Error(errorMessage);
       }
       setTodos(todos.filter((todo) => todo.id !== id));
+      setIsLoading(true);
     } catch (err) {
       console.error("Failed to delete todos:", err);
       setGlobalError("A network or system error occurred.  Please try again.");
