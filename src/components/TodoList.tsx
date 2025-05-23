@@ -1,3 +1,4 @@
+"use client";
 import { Todo, TodoUpdateInput } from "@/types/index";
 import { useState } from "react";
 
@@ -109,13 +110,12 @@ const TodoList = ({ todo, updateTodo, deleteTodo }: TodoListProps) => {
             </div>
             <div id="created-date-label">
               <label>
-                {" "}
-                Created:{new Date(todo.createdAt).toLocaleDateString()}
+                Created: {new Date(todo.createdAt).toLocaleString()}
               </label>
             </div>
             <div id="updated-date-label">
               <label>
-                Updated:{new Date(todo.updatedAt).toLocaleDateString()}
+                Updated: {new Date(todo.updatedAt).toLocaleString()}
               </label>
             </div>
 
@@ -140,14 +140,12 @@ const TodoList = ({ todo, updateTodo, deleteTodo }: TodoListProps) => {
             </div>
             <div id="created-date-label">
               <label>
-                {" "}
-                Created: {new Date(todo.createdAt).toLocaleDateString()}
+                Created: {new Date(todo.createdAt).toLocaleString()}
               </label>
             </div>
             <div id="updated-date-label">
               <label>
-                {" "}
-                Updated: {new Date(todo.updatedAt).toLocaleDateString()}
+                Updated: {new Date(todo.updatedAt).toLocaleString()}
               </label>
             </div>
 
