@@ -1,14 +1,168 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Todo, TodoAddInput, TodoUpdateInput } from "@/types/index";
 import TodoForm from "@/components/TodoForm";
 import TodoList from "@/components/TodoList";
 
-const Home = () => {
-  const [httpError, setHttpError] = useState("");
-  const [globalError, setGlobalError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+const Page = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [httpError, setHttpError] = useState<string>("");
+  const [globalError, setGlobalError] = useState<string>("");
+
+  useEffect(() => {
+    getDataHandler();
+  }, []);
+
+  // Setup CRUD API Calls
+  // CREATE - POST
+  const createTodoHandler = async (todoAddInput: TodoAddInput) => {
+    // Set default states
+    setHttpError("");
+    setGlobalError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/todos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todoAddInput),
+      });
+
+      const data = await response.json();
+
+      // Check for Http error
+      if (!response.ok) {
+        const errorMessage =
+          data?.error || "Failed to create todo due to http error";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage); // ❗ Purpose: stop here and go to catch
+      }
+
+      // If data clears
+      setTodos((prev) => [data, ...prev]);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to create todo due to parsing JSON";
+      setGlobalError(errorMessage);
+      throw err; // ❗ Purpose: pass the error up to the parent component
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // READ - GET
+  const getDataHandler = async () => {
+    // Set default states
+    setHttpError("");
+    setGlobalError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/todos", {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      const data = await response.json();
+
+      // Check for Http error
+      if (!response.ok) {
+        const errorMessage =
+          data?.error || "Failed to fetch todos due to http error";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage); // ❗ Purpose: stop here and go to catch
+      }
+
+      // If data clears
+      setTodos(data);
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch todos due to parsing JSON";
+      setGlobalError(errorMessage);
+      throw err; // ❗ Purpose: pass the error up to the parent component
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // UPDATE - PUT
+  const updateDataHandler = async (
+    id: number,
+    todoUpdateInput: TodoUpdateInput
+  ) => {
+    // Set default states
+    setHttpError("");
+    setGlobalError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(todoUpdateInput),
+      });
+
+      const updatedData = await response.json();
+
+      // Check for Http error
+      if (!response.ok) {
+        const errorMessage =
+          updatedData?.error || "Failed to update todos due to http error";
+        setHttpError(errorMessage);
+        throw new Error(errorMessage); // ❗ Purpose: stop here and go to catch
+      }
+
+      // If data clears
+      setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to fetch todos due to parsing JSON";
+      setGlobalError(errorMessage);
+      throw err; // ❗ Purpose: pass the error up to the parent component
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // DELETE - DELETE
+  const deleteDataHandler = async (id: number) => {
+    // Set default states
+    setHttpError("");
+    setGlobalError("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch(`/api/todos/${id}`, {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+      });
+
+      // Check for Http error
+      if (!response.ok) {
+        setHttpError("Failed to delete todos due to http error");
+        throw new Error("Failed to delete todos due to http error"); // ❗ Purpose: stop here and go to catch
+      }
+
+      // If data clears
+      setTodos(todos.filter((todo) => todo.id !== id));
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to delete todos due to parsing JSON";
+      setGlobalError(errorMessage);
+      throw err; // ❗ Purpose: pass the error up to the parent component
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const renderLoadingSpinner = () => {
     return (
@@ -18,168 +172,55 @@ const Home = () => {
 
   const renderEmptySpace = () => {
     return (
-      <div className="text-gray-500">
-        No todos yet. Create one to get started!
+      <div className=" w-[500px] h-[500px] bg-white">
+        <div>No todos yet. Create one to get started!</div>
       </div>
     );
   };
 
-  //CRUD - Create, Read, Update, Delete API calls
-  // Create - POST a new todo
-  const createTodoHandler = async (todoAddInput: TodoAddInput) => {
-    // Set default values
-    setHttpError("");
-    setGlobalError("");
-
-    try {
-      // Post data call
-      const response = await fetch("/api/todos", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(todoAddInput),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data?.error || "An http error occurred";
-        setHttpError(errorMessage);
-        throw new Error(errorMessage);
-      }
-      setTodos((prev) => [data, ...prev]);
-      setIsLoading(true);
-    } catch (err) {
-      console.error("Failed to create todo:", err);
-      setGlobalError("A network or system error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Move getDataHandler before useEffect
-  const getDataHandler = async () => {
-    // Set default values
-    setHttpError("");
-    setGlobalError("");
-
-    try {
-      // Fetch data call
-      const response = await fetch("/api/todos");
-      const data = await response.json();
-
-      if (!response.ok) {
-        const errorMessage = data?.error || "An http error occurred";
-        setHttpError(errorMessage);
-        throw new Error(errorMessage);
-      }
-      setTodos(data);
-      setIsLoading(true);
-    } catch (err) {
-      console.error("Failed to fetch todos:", err);
-      setGlobalError("A network or system error occurred. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Fix useEffect syntax
-  useEffect(() => {
-    getDataHandler();
-  }, []); // Empty dependency array since getDataHandler is defined in component
-
-  // Update - PUT an existing todo by id
-  const updateTodoHandler = async (
-    id: number,
-    todoUpdateInput: TodoUpdateInput
-  ) => {
-    // Set default values
-    setHttpError("");
-    setGlobalError("");
-
-    try {
-      // Fetch data call
-      const response = await fetch(`/api/todos/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(todoUpdateInput),
-      });
-      const updatedData = await response.json();
-
-      // Check Http
-      if (!response.ok) {
-        const errorMessage = updatedData?.error || "An http error occurred";
-        setHttpError(errorMessage);
-        throw new Error(errorMessage);
-      }
-      setTodos(todos.map((todo) => (todo.id === id ? updatedData : todo)));
-      setIsLoading(true);
-    } catch (err) {
-      console.error("Failed to update todos:", err);
-      setGlobalError("A network or system error occurred.  Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Delete - DELETE todo by id
-  const deleteTodoHandler = async (id: number) => {
-    // Set default values
-    setHttpError("");
-    setGlobalError("");
-
-    try {
-      // Fetch data call
-      const response = await fetch(`/api/todos/${id}`, {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-      });
-
-      // Check Http
-      if (!response.ok) {
-        const errorMessage = "Failed to delete todo";
-        setHttpError(errorMessage);
-        throw new Error(errorMessage);
-      }
-      setTodos(todos.filter((todo) => todo.id !== id));
-      setIsLoading(true);
-    } catch (err) {
-      console.error("Failed to delete todos:", err);
-      setGlobalError("A network or system error occurred.  Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
   return (
-    <>
-      <section className="text-red-500">
-        {(httpError || globalError) && (
-          <div>
-            {httpError && <div>{httpError}</div>}
-            {globalError && <div>{globalError}</div>}
-          </div>
+    <div className="flex flex-row justify-center items-center ">
+      <div className="flex flex-row gap-5 justify-center items-center">
+        {/* Display errors */}
+        {httpError && (
+          <div className="text-red-500 mb-4">HTTP Error: {httpError}</div>
         )}
-      </section>
+        {globalError && (
+          <div className="text-red-500 mb-4">Error: {globalError}</div>
+        )}
 
-      <section className="flex flex-row gap-4 p-4">
         {isLoading ? (
           renderLoadingSpinner()
         ) : (
-          <>
+          <div className="flex flex-row gap-4">
             <TodoForm createTodo={createTodoHandler} />
-            {todos.length === 0 ? (
-              renderEmptySpace()
-            ) : (
-              <TodoList
-                todos={todos}
-                updateTodo={updateTodoHandler}
-                deleteTodo={deleteTodoHandler}
-              />
-            )}
-          </>
+
+            <div className="flex flex-row gap-4">
+              <div>
+                {todos.length === 0 ? (
+                  renderEmptySpace()
+                ) : (
+                  <>
+                    <div>
+                      <h1 className="text-2xl text-center">Todo List</h1>
+                    </div>
+                    {todos.map((todo) => (
+                      <TodoList
+                        key={todo.id}
+                        todo={todo}
+                        updateTodo={updateDataHandler}
+                        deleteTodo={deleteDataHandler}
+                      />
+                    ))}
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
         )}
-      </section>
-    </>
+      </div>
+    </div>
   );
 };
 
-export default Home;
+export default Page;

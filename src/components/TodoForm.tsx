@@ -1,82 +1,90 @@
-"use client";
-import React, { useState } from "react";
+import { useState } from "react";
 import { TodoAddInput } from "@/types";
-import { formStyles, inputStyles, buttonStyles } from "@/styles/common";
 
 interface TodoFormProps {
-  createTodo: (todoAddInput: TodoAddInput) => void;
+  createTodo: (todoAddInput: TodoAddInput) => Promise<void>;
 }
 
 const TodoForm = ({ createTodo }: TodoFormProps) => {
-  const [formError, setFormError] = useState<string>("");
-  const [todoTitle, setTodoTitle] = useState<string>("");
-  const [todoDescription, setTodoDescription] = useState<string>("");
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
 
-  const submitTodo = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // prevent page from refreshing
-    setFormError("");
+  const validateAndCreateTodo = async (e: React.FormEvent) => {
+    e.preventDefault(); // Prevent default form submission
+
     try {
-      if (!todoTitle.trim()) {
-        setFormError("Title is required");
+      //Set states
+      setIsLoading(true);
+      setError("");
+
+      //Check field input(s)
+      if (!title.trim()) {
+        setError("Title field is required.");
         return;
       }
+
       await createTodo({
-        title: todoTitle.trim(),
-        description: todoDescription.trim(),
-        createdAt: new Date(),
+        title: title,
+        description: description,
       });
-      setIsSubmitting(true);
+
+      // Clear form on success
+      setTitle("");
+      setDescription("");
     } catch (err) {
-      setFormError("Failed to create todo");
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "An unexpected error has occurred while creating todo.";
+      setError(errorMessage);
     } finally {
-      setIsSubmitting(false);
+      setIsLoading(false);
     }
   };
 
   return (
-    <section id="todo-form" className="flex-1">
-      <div id="form-header">
-        <h1 className="text-2xl font-bold mb-4">To Do Form:</h1>
-      </div>
-      {formError && <div className={formStyles.error}>{formError}</div>}
-      <form onSubmit={submitTodo} className={formStyles.container}>
-        <div className={formStyles.field}>
-          <label className={formStyles.label}>Title *</label>
+    <section id="form-section" className=" w-96 h-[600px]">
+      <h1 className="text-2xl text-center">Todo Form:</h1>
+
+      {error && <div className="text-red-500 mb-4">{error}</div>}
+
+      <form onSubmit={validateAndCreateTodo} className="bg-white h=full gap-4">
+        <div id="title-input">
+          <label> Title *</label>
           <input
-            type="text"
-            placeholder="Enter title here"
-            onChange={(e) => setTodoTitle(e.target.value)}
-            value={todoTitle}
-            className={`${inputStyles.base} ${
-              formError ? inputStyles.error : ""
-            }`}
+            placeholder="Enter title"
+            onChange={(e) => setTitle(e.target.value)}
+            value={title}
+            className="w-full"
+            disabled={isLoading}
           />
         </div>
-        <div className={formStyles.field}>
-          <label className={formStyles.label}>Description</label>
+
+        <div id="description-input">
+          <label> Description - optional</label>
           <textarea
-            placeholder="Enter description here"
+            placeholder="Enter description"
             rows={10}
-            onChange={(e) => setTodoDescription(e.target.value)}
-            value={todoDescription}
-            className={inputStyles.base}
+            onChange={(e) => setDescription(e.target.value)}
+            value={description}
+            className="w-full"
+            disabled={isLoading}
           />
         </div>
+
         <div>
           <button
             type="submit"
-            className={`${buttonStyles.primary} ${
-              isSubmitting ? buttonStyles.disabled : ""
-            }`}
-            disabled={isSubmitting}
+            className="bg-blue-300 justify-center"
+            disabled={isLoading}
           >
-            {isSubmitting ? "Adding..." : "Add Todo"}
+            {isLoading ? "Adding..." : "Add Todo"}
           </button>
         </div>
       </form>
     </section>
   );
 };
-
 export default TodoForm;

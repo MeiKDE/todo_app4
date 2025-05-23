@@ -1,31 +1,20 @@
 export interface Todo {
-  id: number;
+  id: number; //unique identifier, auto set by database
   title: string;
   description?: string;
-  completed: boolean;
-  createdAt: Date;
-  updatedAt: Date;
+  completed: boolean; //default as false
+  createdAt: Date; // default as current date
+  updatedAt: Date; // default as current date
 }
 
 export type TodoAddInput = {
   title: string;
   description?: string;
-  createdAt: Date;
 };
 
 export type TodoUpdateInput = {
-  id: number;
-  title?: string;
+  title: string;
   description?: string;
   completed: boolean;
   updatedAt: Date;
-};
-
-export type ErrorHandlers = {
-  //A string that likely serves as a default or fallback error message when no specific message is provided.
-  fallbackMessage: string;
-  //A method (function) that takes a string argument (msg) and returns void (i.e., no //return value).
-  setHttpError: (msg: string) => void;
-  //Similar to setHttpError, but likely for errors that are not specific to HTTP — more general or application-wide issues.
-  setGlobalError: (msg: string) => void;
 };
