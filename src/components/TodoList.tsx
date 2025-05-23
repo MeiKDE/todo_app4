@@ -16,67 +16,54 @@ const TodoList = ({ todo, updateTodo, deleteTodo }: TodoListProps) => {
 
   const confirmAndDeleteTodo = async () => {
     try {
-      // Set states
-      setIsEditing(true);
-
       const confirmed = window.confirm(
         `Are you sure you want to delete ${todo.title}? `
       );
       if (confirmed) {
+        setIsEditing(true);
         await deleteTodo(todo.id);
       }
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to delete todo item.";
       setError(errorMessage);
-      throw new Error(errorMessage); //stops execution here
     } finally {
       setIsEditing(false);
     }
   };
 
   const exitMode = () => {
-    try {
-      setTitle(todo.title);
-      setDescription(todo.description);
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Failed to exit from updating todo item.";
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    } finally {
-      setIsEditing(false);
-    }
+    setTitle(todo.title);
+    setDescription(todo.description);
+    setIsEditing(false);
+    setError("");
   };
 
   const validateAndUpdateTodo = async () => {
+    if (!title.trim()) {
+      setError("Title field is required.");
+      return;
+    }
+
     try {
-      // Set states
       setIsEditing(true);
-      setError(""); // Clear any previous errors
+      setError("");
 
-      //Check field input(s)
-      if (!title.trim()) {
-        setError("Title field is required.");
-        return;
-      }
-
-      await updateTodo(todo.id, {
-        title: title,
-        description: description,
-        completed: !todo.completed,
+      const updatedTodo: TodoUpdateInput = {
+        title: title.trim(),
+        description: description?.trim() ?? "",
+        completed: todo.completed,
         updatedAt: new Date(),
-      });
+      };
 
-      setError(""); // Clear error on successful update
-      exitMode();
+      await updateTodo(todo.id, updatedTodo);
+      setError("");
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to update todo item.";
       setError(errorMessage);
-      throw new Error(errorMessage);
+    } finally {
+      setIsEditing(false);
     }
   };
 
@@ -85,7 +72,6 @@ const TodoList = ({ todo, updateTodo, deleteTodo }: TodoListProps) => {
       {error && <div className="text-red-500">{error}</div>}
       {isEditing ? (
         <section id="edit-item" className=" w-96">
-          <h1 className="text-2xl text-center">Todo List:</h1>
           <div className="bg-white h-full gap-4">
             <div id="title-label">
               <input
